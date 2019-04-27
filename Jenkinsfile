@@ -2,7 +2,7 @@ pipeline {
   agent {
     docker {
       args '-v /root/.m2:/root/.m2'
-      image '3.6.1-jdk-8'
+      image 'maven:3.6.1-jdk-8'
     }
 
   }
@@ -19,7 +19,7 @@ pipeline {
             sh 'mvn -B -DskipTests clean package'
           }
         }
-        stage('') {
+        stage('error') {
           steps {
             echo 'build print message'
           }
