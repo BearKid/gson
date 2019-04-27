@@ -1,22 +1,27 @@
 pipeline {
   agent {
     docker {
-      image '3.6.1-jdk-8-alpine '
       args '-v /root/.m2:/root/.m2'
+      image '3.6.1-jdk-8'
     }
 
   }
   stages {
-    stage('duild') {
+    stage('Build') {
       parallel {
-        stage('Build') {
+        stage('print build') {
+          steps {
+            sh 'echo "hello world"'
+          }
+        }
+        stage('build') {
           steps {
             sh 'mvn -B -DskipTests clean package'
           }
         }
-        stage('cuild') {
+        stage('') {
           steps {
-            echo 'building, please wait...'
+            echo 'build print message'
           }
         }
       }
