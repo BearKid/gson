@@ -1,30 +1,39 @@
 pipeline {
-  agent {
-    docker {
-      args '-v /root/.m2:/root/.m2'
-      image 'maven:3.6.1-jdk-8'
-    }
-
+  agent none
+  options {
+      buildDiscarder(logRotator(numToKeepStr: '5')) 
+      skipDefaultCheckout()
   }
   stages {
-    stage('Build') {
-      parallel {
-        stage('print build') {
-          steps {
-            sh 'echo "hello world"'
-          }
+        stage('checkout') {
+            agent any
+            steps {
+                checkout scm
+            }
         }
         stage('build') {
+          agent {
+                docker {
+                  args '-v /root/.m2:/root/.m2 -v /var/run/docker.sock:/var/run/docker.sock'
+                  image 'maven:3-alpine'
+                }
+          }
           steps {
-            sh 'mvn -B -DskipTests clean package'
+            script {
+                def artifactId = sh(
+                    returnStdout: true,
+                    script: 'mvn help:evaluate -Dexpression=project.artifactId -q -DforceStdout'
+                )
+                def groupId = sh(
+                    returnStdout: true,
+                    script: 'mvn help:evaluate -Dexpression=project.groupId -q -DforceStdout'
+                )
+                echo "groupId is ${groupId}, artifactId is ${artifactId}"
+                def artifactInfo = "groupId=${groupId} arifactId=${artifactId}"
+                sh 'echo ${artifactInfo} > ./hello.txt'
+                sh 'ls ./'
+            }
           }
         }
-        stage('error') {
-          steps {
-            echo 'build print message'
-          }
-        }
-      }
-    }
   }
 }
