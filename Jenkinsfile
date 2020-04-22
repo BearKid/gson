@@ -29,9 +29,23 @@ pipeline {
                     script: 'mvn help:evaluate -Dexpression=project.groupId -q -DforceStdout'
                 )
                 echo "groupId is ${groupId}, artifactId is ${artifactId}"
-                def artifactInfo = "groupId=${groupId} arifactId=${artifactId}"
-                sh 'echo ${artifactInfo} > ./hello.txt'
+              
+                def appLayer = ""
+                if (artifactId == 'supplier-api' || artifactId == 'business-api') {
+                  appLayer = 'bff'
+                } else if (artifactId =~ '^.*-handler'){
+                  appLayer = "handler"
+                } else if (artifactId =~ '^.*-api') {
+                  appLayer = "api"
+                } else {
+                  appLayer = "unknown"
+                }
+                echo "appLayer = ${appLayer}"
+                
+                def artifactInfo = "groupId=${groupId} arifactId=${artifactId} appLayer=${appLayer}"
+                sh "echo 【${artifactInfo}】 > ./hello.txt"
                 sh 'ls ./'
+                sh 'cat ./hello.txt'
             }
           }
         }
